@@ -21,8 +21,8 @@ export default function Header() {
         <Link className="text-white hover:text-gray-300" href="#">
           Contact
         </Link>
-        <Button variant="link" className="text-white font-bold p-0 pr-1" onClick={() => signIn()}>
-          Sign In
+        <Button asChild variant={"link"} className="mx-auto p-0 font-bold text-white border-gray-300">
+          <Link href="/api/auth/signin">Sign In</Link>
         </Button>
       </nav>
     </div>
