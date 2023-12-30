@@ -39,40 +39,44 @@ async function seed() {
     });
     const projectIds = createdProjects.map((p) => p.id);
 
-    // Define Folders without projectId
-    let folders = [
-      { name: "Wedding Views" },
-      { name: "Ceremony" },
-      // ... rest of the folders
-    ];
+    // Adjusted code for folder creation
+    const rootFolderCountPerProject = 5; // Assuming we want 5 root folders per project
+    const subFolderCountPerRoot = 1; // Each root folder will have 1 subfolder
 
-    // Assign project IDs to folders
-    folders = folders.map((folder) => ({
-      ...folder,
-      projectId: projectIds[0],
-    })); // Assuming all folders belong to the first project
+    for (let projectId of projectIds) {
+      for (let i = 0; i < rootFolderCountPerProject; i++) {
+        const rootFolderName = `Root Folder ${i + 1}`;
+        const rootFolder = await prisma.folder.create({
+          data: {
+            name: rootFolderName,
+            projectId: projectId,
+          },
+        });
 
-    // Create Folders
-    // @ts-ignore
-    await prisma.folder.createMany({ data: folders });
-
-    // Get Folder IDs for Images
-    const createdFolders = await prisma.folder.findMany({
-      select: { id: true },
-    });
-    const folderIds = createdFolders.map((f) => f.id);
+        for (let j = 0; j < subFolderCountPerRoot; j++) {
+          const subFolderName = `Subfolder ${i + 1}-${j + 1}`;
+          await prisma.folder.create({
+            data: {
+              name: subFolderName,
+              projectId: projectId,
+              parentId: rootFolder.id,
+            },
+          });
+        }
+      }
+    }
 
     // Define Images
     const images = [
       {
         label: "Image 1",
         url: "https://example.com/image1.jpg",
-        folderId: folderIds[0],
+        folderId: null, // You can associate images with folders as needed
       },
       {
         label: "Image 2",
         url: "https://example.com/image2.jpg",
-        folderId: folderIds[1],
+        folderId: null, // You can associate images with folders as needed
       },
       // ... rest of the images
     ];

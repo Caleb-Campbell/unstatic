@@ -10,7 +10,7 @@ import { type Folder } from "@prisma/client";
 export async function Dashboard() {
   const folders: Folder[] = await db.folder.findMany({
     where: {
-      id: 63,
+      projectId: 1,
     },
   });
 
