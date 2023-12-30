@@ -1,7 +1,9 @@
-export const Dashboard = () => {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-    </div>
-  );
+"use client";
+
+import { Dashboard } from "~/components/dashboard";
+
+const DashboardPage = () => {
+  return <Dashboard />;
 };
+
+export default DashboardPage;
