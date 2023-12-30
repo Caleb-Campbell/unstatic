@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+import { signIn } from "next-auth/react";
 
 export default function LandingPage() {
   const loggedIn = false;
@@ -16,9 +17,7 @@ export default function LandingPage() {
       </div>
       <div className="w-full">
         <Button asChild variant={"ghost"} className="mx-auto border-gray-300">
-          <Link href={`${loggedIn ? "/dashboard" : "sign-in"}`}>
-            Get Started
-          </Link>
+          <Link href="/api/auth/signin">Get Started</Link>
         </Button>
       </div>
     </main>
