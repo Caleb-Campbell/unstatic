@@ -1,36 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Client` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Developer` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `_ProjectClients` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `_ProjectDevelopers` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "_ProjectClients" DROP CONSTRAINT "_ProjectClients_A_fkey";
-
--- DropForeignKey
-ALTER TABLE "_ProjectClients" DROP CONSTRAINT "_ProjectClients_B_fkey";
-
--- DropForeignKey
-ALTER TABLE "_ProjectDevelopers" DROP CONSTRAINT "_ProjectDevelopers_A_fkey";
-
--- DropForeignKey
-ALTER TABLE "_ProjectDevelopers" DROP CONSTRAINT "_ProjectDevelopers_B_fkey";
-
--- DropTable
-DROP TABLE "Client";
-
--- DropTable
-DROP TABLE "Developer";
-
--- DropTable
-DROP TABLE "_ProjectClients";
-
--- DropTable
-DROP TABLE "_ProjectDevelopers";
-
 -- CreateTable
 CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
@@ -80,6 +47,34 @@ CREATE TABLE "VerificationToken" (
 );
 
 -- CreateTable
+CREATE TABLE "Project" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Folder" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "parentId" INTEGER,
+    "projectId" INTEGER NOT NULL,
+
+    CONSTRAINT "Folder_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Image" (
+    "id" SERIAL NOT NULL,
+    "label" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "folderId" INTEGER NOT NULL,
+
+    CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_UserProjects" (
     "A" INTEGER NOT NULL,
     "B" TEXT NOT NULL
@@ -111,6 +106,15 @@ ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Folder" ADD CONSTRAINT "Folder_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Folder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Folder" ADD CONSTRAINT "Folder_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Image" ADD CONSTRAINT "Image_folderId_fkey" FOREIGN KEY ("folderId") REFERENCES "Folder"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_UserProjects" ADD CONSTRAINT "_UserProjects_A_fkey" FOREIGN KEY ("A") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
