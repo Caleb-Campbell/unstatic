@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <main>
         <div
-          className={`h-screen bg-gradient-to-tr from-slate-400 to-slate-600 bg-no-repeat font-sans ${inter.variable}`}
+          className={`h-screen bg-gradient-to-tr from-slate-400 to-slate-300 bg-no-repeat font-sans ${inter.variable}`}
         >
           {children}
         </div>
