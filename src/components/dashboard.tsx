@@ -15,36 +15,62 @@ import {
 import { Project } from "@prisma/client";
 import Modal from "./Modal";
 import CreateANewProject from "~/views/CreateAProject";
-
-export function Dashboard({
-  userData,
+import { ArrowLeft, PlusIcon, XIcon } from "lucide-react";
+import { ImageList } from "./component/ImageList";
+import {
   createNewFolder,
-}: {
-  userData: any;
-  createNewFolder: (name: string) => void;
-}) {
-  const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
+  createNewImage,
+  createNewProject,
+} from "~/lib/actions";
+import { UploadButton } from "./uploadthing/uploadthing";
+
+type NewImageData = {
+  url: string;
+  label: string;
+  image: string;
+};
+
+export function Dashboard({ userData }: { userData: any }) {
+  const [selectedFolder, setSelectedFolder] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState<boolean>(false);
+  const [showNewImageModal, setShowNewImageModal] = useState<boolean>(false);
+  const [newImageData, setNewImageData] = useState<NewImageData>({
+    url: "",
+    label: "",
+    image: "",
+  });
 
   const newFolderNameRef = useRef<HTMLInputElement>(null);
 
   if (!userData.projects[0]) {
-    return <CreateANewProject />;
+    return (
+      <CreateANewProject
+        finishView={() =>
+          createNewProject(newFolderNameRef.current?.value!, userData.id)
+        }
+        projectTitleRef={newFolderNameRef}
+      />
+    );
   }
 
   return (
     <>
       <Modal open={showNewFolderModal} setOpen={setShowNewFolderModal}>
         <form
-          onSubmit={() => {
+          onSubmit={(e) => {
+            e.preventDefault();
             newFolderNameRef.current?.value.length! > 0 &&
-              createNewFolder(newFolderNameRef.current?.value!);
+              createNewFolder(
+                newFolderNameRef.current?.value!,
+                userData.projects[selectedProject || 0].id,
+              );
+            setShowNewFolderModal(false);
           }}
           className="w-[400px] p-5"
         >
           <Label htmlFor="name">Folder Name</Label>
-          <Input className="my-1" />
+          <Input className="my-1" ref={newFolderNameRef} />
           <div className="flex items-center justify-between">
             <Button
               variant="outline"
@@ -56,83 +82,185 @@ export function Dashboard({
           </div>
         </form>
       </Modal>
-      <div className="grid gap-4 p-4 lg:grid-cols-[300px_1fr]">
-        <div className="flex h-full flex-col overflow-hidden rounded-lg border-r bg-gray-100 dark:bg-gray-800">
-          <div className="border-b bg-white dark:bg-gray-900">
-            <Select>
-              <SelectTrigger className="w-[300px]">
-                <SelectValue
-                  placeholder={userData.projects[selectedProject || 0].name}
-                />
-              </SelectTrigger>
-              <SelectContent className="w-[300px]">
-                {userData.projects.map((project: Project) => (
-                  <SelectItem
-                    className="cursor-pointer"
-                    key={project.id}
-                    value={project.name}
-                  >
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <FolderList
-            setSelectedFolder={setSelectedFolder}
-            folders={userData.projects[selectedProject || 0].folders}
-            setShowNewFolderModal={setShowNewFolderModal}
+      <Modal open={showNewImageModal} setOpen={setShowNewImageModal}>
+        <div className="w-[700px] p-5">
+          <Label htmlFor="name" className="text-2xl">
+            Image Label
+          </Label>
+          <Input
+            className="my-1"
+            onChange={(e) =>
+              setNewImageData({ ...newImageData, label: e.target.value })
+            }
           />
+          <p className="text-sm italic">
+            * This label is for your identification and does not affect any part
+            of your image.
+          </p>
+          {!newImageData.image && (
+            <>
+              <p className="my-5 text-center text-sm">
+                You don't need to upload an image. That can be done later by you
+                or your client.
+              </p>
+              <UploadButton
+                endpoint="imageUploader"
+                onClientUploadComplete={(res: any) => {
+                  console.log(res[0].url);
+                  setNewImageData({ ...newImageData, image: res[0].url });
+                }}
+                onUploadError={(error: Error) => {
+                  // Do something with the error.
+                  alert(`ERROR! ${error.message}`);
+                }}
+              />
+            </>
+          )}
+          {newImageData.image && (
+            <div className="relative">
+              <Button
+                className="absolute right-1 top-1"
+                variant="destructive"
+                onClick={() => setNewImageData({ ...newImageData, image: "" })}
+              >
+                <XIcon className="h-4 w-4" />
+              </Button>
+              <img src={newImageData.image} />
+            </div>
+          )}
+          <Label htmlFor="url" className="text-2xl">
+            Image URL
+          </Label>
+          <p className="mb-4 text-sm">
+            This is the URL that will be used to display your image.
+          </p>
+          {/* TODO: We will need to add the real URL */}
+          <div>
+            <span>
+              {"https://unstatic.com/"}
+              {selectedProject || userData.projects[0].id}
+              {"/"}
+              {selectedFolder || userData.projects[0].folders[0].name}
+              {"/"}
+            </span>
+            <input
+              className="inline h-5 w-fit max-w-[50%] border-b border-slate-700 py-0 focus:outline-none focus:ring-0"
+              onChange={(e) =>
+                setNewImageData({ ...newImageData, url: e.target.value })
+              }
+            />
+          </div>
+          <div className="mx-auto mt-10 flex w-1/2 items-center justify-between">
+            <Button
+              className="mx-2 w-full"
+              variant="outline"
+              onClick={() => setShowNewImageModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="mx-2 w-full"
+              onClick={() => {
+                setShowNewImageModal(false);
+                newImageData.label && newImageData.url;
+                createNewImage({
+                  name: newImageData.label,
+                  url: newImageData.url,
+                  image: newImageData.image,
+                  folderId:
+                    userData.projects[selectedProject || 0].folders[
+                      selectedFolder
+                    ].id,
+                });
+              }}
+            >
+              Create
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      <div className="grid gap-4 p-4 lg:grid-cols-[300px_1fr]">
+        <div className="flex h-[90vh] flex-col justify-between overflow-hidden rounded-lg border-r bg-gray-100 dark:bg-gray-800">
+          <div>
+            <div className="border-b bg-white dark:bg-gray-900">
+              <Select>
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue
+                    placeholder={userData.projects[selectedProject || 0].name}
+                  />
+                </SelectTrigger>
+                <SelectContent className="w-[300px]">
+                  {userData.projects.map((project: Project) => (
+                    <SelectItem
+                      className="cursor-pointer"
+                      key={project.id}
+                      value={project.name}
+                    >
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem
+                    className="flex cursor-pointer"
+                    value={"Create a new project"}
+                  >
+                    <PlusIcon className="ml-2 h-4 w-4" />
+                    <span>Create New Project</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <FolderList
+              setSelectedFolder={setSelectedFolder}
+              folders={userData.projects[selectedProject || 0].folders}
+              setShowNewFolderModal={setShowNewFolderModal}
+            />
+          </div>
+
           <div className="border-t bg-white dark:bg-gray-900">
             <div className="flex items-center gap-4 p-4">
               <Avatar className="z-20 h-12 w-12">
-                <AvatarImage alt="User Avatar" src="/placeholder-avatar.jpg" />
-                <AvatarFallback>JP</AvatarFallback>
+                <AvatarImage alt="User Avatar" src={userData.image} />
+                <AvatarFallback>{userData.name}</AvatarFallback>
               </Avatar>
               <div>
-                <div className="text-lg font-semibold">Username</div>
+                <div className="text-lg font-semibold">{userData.name}</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Additional Details
+                  {userData.email}
                 </div>
               </div>
             </div>
             <div className="p-4">
-              <Button className="w-full" variant="outline">
+              <Button className="w-full" variant="link">
                 Account Settings
               </Button>
             </div>
           </div>
         </div>
-        <main className="flex flex-col gap-4 p-4">
-          <h1 className="text-2xl font-semibold">
-            {
-              userData.projects[selectedProject || 0].folders[
-                selectedFolder || 0
-              ].name
-            }
-          </h1>
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="image">Image</Label>
-              <Input
-                className="rounded border-gray-300"
-                id="image"
-                type="file"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="label">Label</Label>
-              <Input
-                className="rounded border-gray-300 "
-                id="label"
-                type="text"
-              />
-            </div>
-            <Button className="w-32 self-end" variant="outline">
-              Submit
-            </Button>
-          </form>
-        </main>
+        {userData.projects[selectedProject || 0].folders.length > 0 ? (
+          <main className="flex flex-col gap-4">
+            <ImageList
+              openNewImageModal={() => setShowNewImageModal(true)}
+              images={
+                userData.projects[selectedProject || 0].folders[selectedFolder]
+                  .images
+              }
+            />
+          </main>
+        ) : (
+          <main className="flex flex-col gap-4 p-4">
+            <p className="text-center text-3xl font-bold">
+              Let's make a folder
+            </p>
+            <p className="text-center text-gray-500">
+              Folders are how you'll organize your images, so you or your client
+              can easily find and change them.
+            </p>
+            <p className="text-center text-gray-500">
+              You can create a folder in the sidebar on the left.
+              <ArrowLeft className="mx-auto h-12 w-12 text-gray-500" />
+            </p>
+          </main>
+        )}
       </div>
     </>
   );

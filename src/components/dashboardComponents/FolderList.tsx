@@ -15,19 +15,21 @@ export default function FolderList({
   setShowNewFolderModal,
 }: FolderListProps) {
   return (
-    <div>
+    <div className="mt-0">
       <Button
         onClick={() => setShowNewFolderModal(true)}
-        className="w-full"
+        className={`w-full ${
+          folders.length <= 0 && "animate-pulse bg-yellow-200"
+        }`}
         variant="outline"
       >
         New Folder
       </Button>
-      {folders.map((folder) => (
+      {folders.map((folder, index) => (
         <div
           key={folder.id}
           className="cursor-pointer"
-          onClick={() => setSelectedFolder(folder.id)}
+          onClick={() => setSelectedFolder(index)}
         >
           {folder.name}
         </div>

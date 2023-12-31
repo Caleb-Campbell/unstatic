@@ -1,9 +1,16 @@
 "use client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 
-export default function CreateANewProject() {
+export default function CreateANewProject({
+  projectTitleRef,
+  finishView,
+}: {
+  projectTitleRef: React.RefObject<HTMLInputElement>;
+  finishView: () => void;
+}) {
   const [projectCreationStep, setProjectCreationStep] = useState<number>(0);
 
   const displayCurrentStep = () => {
@@ -13,14 +20,15 @@ export default function CreateANewProject() {
           <div className="flex h-full flex-col items-center justify-center">
             <h1 className="text-3xl font-bold">Create a new project</h1>
             <p className="text-gray-100">
-              Projects are a great way to organize your work
+              You don't have any projects yet. Create one to get started.
             </p>
             <Button
               className="mt-4 text-primary"
               onClick={() => setProjectCreationStep(1)}
               variant="outline"
             >
-              Create a new project
+              Next
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
         );
@@ -29,11 +37,17 @@ export default function CreateANewProject() {
           <div className="flex h-full flex-col items-center justify-center">
             <h1 className="text-3xl font-bold">Name your project</h1>
             <p className="text-gray-100">
-              Projects are a great way to organize your work
+              Don't worry, you can change this later.
             </p>
+            <Input
+              ref={projectTitleRef}
+              className="mt-4 bg-gray-200 text-slate-600"
+            />
             <Button
               className="mt-4 text-primary"
-              onClick={() => setProjectCreationStep(1)}
+              onClick={() =>
+                projectTitleRef.current?.value?.length! > 0 && finishView()
+              }
               variant="outline"
             >
               Create a new project

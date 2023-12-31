@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   const userData = await db.user.findUnique({
     where: {
-      id: "clqsqatf600009qp2xcte9x90",
+      id: "clqt1ijgs0000fp8ncinpnapc",
     },
     include: {
       projects: {
@@ -30,20 +30,5 @@ export default async function DashboardPage() {
     },
   });
 
-  const createNewFolder = async (name: string) => {
-    "use server";
-    db.folder.create({
-      data: {
-        name: "New Folder",
-        project: {
-          connect: {
-            id: userData?.projects[0]?.id,
-          },
-        },
-      },
-    });
-  };
-
-  // Return the Dashboard component with userData as props
-  return <Dashboard createNewFolder={createNewFolder} userData={userData} />;
+  return <Dashboard userData={userData} />;
 }

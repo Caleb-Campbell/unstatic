@@ -1,0 +1,7 @@
+
+
+UP NEXT:
+- When the user signs in, they are taken back to the home page, and when you navigate to /dashboard, it has a hard time getting the userId from the current session. This might be how it's called back, but I've had to manually insert my user Id for testing purposes.
+
+ISSUES:
+- Change ids in folder and project tables to strings. This looks much better thaan having a number as an id. This means we will need to modify how they are used in the dashboard as well

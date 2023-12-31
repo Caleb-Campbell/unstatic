@@ -74,7 +74,8 @@ model Folder {
 
 model Image {
   id       Int    @id @default(autoincrement())
-  label    String
+  label    String?
+  src      String?
   url      String
   folderId Int
   folder   Folder @relation(fields: [folderId], references: [id])
