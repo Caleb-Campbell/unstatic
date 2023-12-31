@@ -7,8 +7,10 @@ async function clearDatabase() {
     await prisma.image.deleteMany();
     await prisma.folder.deleteMany();
     await prisma.project.deleteMany();
-    await prisma.client.deleteMany();
-    await prisma.developer.deleteMany();
+    await prisma.account.deleteMany();
+    await prisma.session.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.verificationToken.deleteMany();
     console.log("Database cleared successfully.");
   } catch (error) {
     console.error("Error clearing database:", error);
@@ -18,30 +20,39 @@ async function clearDatabase() {
 async function seed() {
   await clearDatabase();
   try {
-    const developers = [
-      { name: "Developer 1", email: "developer1@example.com" },
-      { name: "Developer 2", email: "developer2@example.com" },
+    // Seed Users
+    const users = [
+      { name: "User 1", email: "user1@example.com", isDeveloper: true },
+      { name: "User 2", email: "user2@example.com", isDeveloper: false },
     ];
-    const clients = [
-      { name: "Client 1", email: "client1@example.com" },
-      { name: "Client 2", email: "client2@example.com" },
-    ];
-    const projects = [{ name: "Project 1" }, { name: "Project 2" }];
+    await prisma.user.createMany({ data: users });
+    const createdUsers = await prisma.user.findMany({ select: { id: true } });
+    const userIds = createdUsers.map((u) => u.id);
 
-    // Create Developers and Clients
-    await prisma.developer.createMany({ data: developers });
-    await prisma.client.createMany({ data: clients });
+    // Define how many projects you want per user
+    const projectsPerUser = 2; // Adjust as needed
 
-    // Create Projects and get their IDs
-    await prisma.project.createMany({ data: projects });
+    // Seed Projects with User Relation
+    for (const userId of userIds) {
+      for (let i = 0; i < projectsPerUser; i++) {
+        await prisma.project.create({
+          data: {
+            name: `Project ${i + 1} of User ${userId}`,
+            users: {
+              connect: { id: userId },
+            },
+          },
+        });
+      }
+    }
+
+    // Continue with Folder and Image Seeding
+    const rootFolderCountPerProject = 5;
+    const subFolderCountPerRoot = 1;
     const createdProjects = await prisma.project.findMany({
       select: { id: true },
     });
     const projectIds = createdProjects.map((p) => p.id);
-
-    // Adjusted code for folder creation
-    const rootFolderCountPerProject = 5; // Assuming we want 5 root folders per project
-    const subFolderCountPerRoot = 1; // Each root folder will have 1 subfolder
 
     for (let projectId of projectIds) {
       for (let i = 0; i < rootFolderCountPerProject; i++) {
@@ -66,22 +77,11 @@ async function seed() {
       }
     }
 
-    // Define Images
+    // Seed Images (assuming a generic approach)
+    // @ts-ignore
     const images = [
-      {
-        label: "Image 1",
-        url: "https://example.com/image1.jpg",
-        folderId: null, // You can associate images with folders as needed
-      },
-      {
-        label: "Image 2",
-        url: "https://example.com/image2.jpg",
-        folderId: null, // You can associate images with folders as needed
-      },
-      // ... rest of the images
+      "https://imgix.ranker.com/user_node_img/50069/1001364282/original/baby-capybaras-can_t-swim-photo-u1?fit=crop&fm=pjpg&q=60&w=650&dpr=2",
     ];
-
-    // Create Images
     // @ts-ignore
     await prisma.image.createMany({ data: images });
 
