@@ -14,6 +14,7 @@ import {
 } from "./ui/select";
 import { Project } from "@prisma/client";
 import Modal from "./Modal";
+import CreateANewProject from "~/views/CreateAProject";
 
 export function Dashboard({
   userData,
@@ -27,6 +28,10 @@ export function Dashboard({
   const [showNewFolderModal, setShowNewFolderModal] = useState<boolean>(false);
 
   const newFolderNameRef = useRef<HTMLInputElement>(null);
+
+  if (!userData.projects[0]) {
+    return <CreateANewProject />;
+  }
 
   return (
     <>

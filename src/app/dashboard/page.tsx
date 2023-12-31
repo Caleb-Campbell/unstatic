@@ -7,20 +7,19 @@ export default async function DashboardPage() {
   // Fetching session data (if needed)
   const session = await getServerSession();
 
-  // Fetch user data from the database
-  if (!session?.user.id) {
-    return (
-      <div>
-        <h1>Access Denied</h1>
-        <p>You must be signed in to view this page</p>
-        <Link href="/api/auth/signin">Sign In</Link>
-      </div>
-    );
-  }
+  // if (!session?.user.id) {
+  //   return (
+  //     <div>
+  //       <h1>Access Denied</h1>
+  //       <p>You must be signed in to view this page</p>
+  //       <Link href="/api/auth/signin">Sign In</Link>
+  //     </div>
+  //   );
+  // }
 
   const userData = await db.user.findUnique({
     where: {
-      id: session?.user?.id,
+      id: "clqsqatf600009qp2xcte9x90",
     },
     include: {
       projects: {
