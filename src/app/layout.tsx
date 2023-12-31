@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 import { Inter } from "next/font/google";
 import Header from "~/components/layoutComponents/Header";
-import { SessionProvider } from "next-auth/react";
+import Head from "next/head";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,14 +21,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-      <html lang="en">
-        <main>
-          <div
-            className={`h-screen bg-white bg-no-repeat font-sans ${inter.variable}`}
-          >
-            {children}
-          </div>
-        </main>
+    <>
+      <Head>
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <html>
+        <body
+          className={`h-screen bg-gradient-to-tr from-slate-400 to-slate-300 bg-no-repeat font-sans ${inter.variable}`}
+        >
+          <main>{children}</main>
+        </body>
       </html>
+    </>
   );
 }
