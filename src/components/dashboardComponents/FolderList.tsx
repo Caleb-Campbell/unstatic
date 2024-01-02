@@ -37,7 +37,7 @@ export default function FolderList({
   function transformFoldersToTreeData(folders: Folder[]): TreeData {
     const folderMap: { [key: string]: TreeItem } = {};
 
-    folders.forEach((folder) => {
+    folders?.forEach((folder) => {
       folderMap[folder.id] = {
         index: folder.id.toString(),
         canMove: true,
@@ -48,7 +48,7 @@ export default function FolderList({
       };
     });
 
-    folders.forEach((folder) => {
+    folders?.forEach((folder) => {
       if (folder.parentId !== null) {
         folderMap[folder.parentId]?.children.push(folder.id.toString());
       }
