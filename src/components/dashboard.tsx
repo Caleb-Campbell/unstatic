@@ -79,7 +79,7 @@ export function Dashboard({ userData }: { userData: any }) {
                 newFolderNameRef.current?.value!,
                 userData.projects.find(
                   (project: Project) => project.id === selectedProject,
-                )?.id, // Use the selectedProject's ID
+                )?.id || userData.projects[0].id, // Use the selectedProject's ID
                 selectedFolder,
               );
               setShowNewFolderModal(false);
