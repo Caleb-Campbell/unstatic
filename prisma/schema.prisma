@@ -64,6 +64,7 @@ model Project {
 model Folder {
   id        Int      @id @default(autoincrement())
   name      String
+  order     Int?      // New column to track the order of the folders
   parentId  Int?
   projectId Int
   parent    Folder?  @relation("SubFolders", fields: [parentId], references: [id])

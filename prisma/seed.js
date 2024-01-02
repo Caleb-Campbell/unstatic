@@ -55,15 +55,18 @@ async function seed() {
     const projectIds = createdProjects.map((p) => p.id);
 
     for (let projectId of projectIds) {
+      let rootFolderOrder = 1;
       for (let i = 0; i < rootFolderCountPerProject; i++) {
         const rootFolderName = `Root Folder ${i + 1}`;
         const rootFolder = await prisma.folder.create({
           data: {
             name: rootFolderName,
             projectId: projectId,
+            order: rootFolderOrder++,
           },
         });
 
+        let subFolderOrder = 1;
         for (let j = 0; j < subFolderCountPerRoot; j++) {
           const subFolderName = `Subfolder ${i + 1}-${j + 1}`;
           await prisma.folder.create({
@@ -71,6 +74,7 @@ async function seed() {
               name: subFolderName,
               projectId: projectId,
               parentId: rootFolder.id,
+              order: subFolderOrder++,
             },
           });
         }

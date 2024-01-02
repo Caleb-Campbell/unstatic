@@ -5,25 +5,26 @@ import { type Image } from "@prisma/client";
 export function ImageList({
   images,
   openNewImageModal,
+  urlBuilder,
 }: {
   images: Image[];
   openNewImageModal: () => void;
+  urlBuilder: (image: Image) => string;
 }) {
   return (
     <div>
-      {JSON.stringify(images)}
-      <div className="grid h-[90vh] w-full grid-cols-3 gap-4 bg-gray-100 p-5">
+      <div className="grid h-[90vh] w-full grid-cols-3 gap-4 rounded-xl bg-gray-100 p-5">
         {images &&
           images.map((image, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-lg bg-gray-100 shadow-md"
+              className="items start transition-translate flex h-60 cursor-pointer flex-col justify-center overflow-hidden rounded-lg bg-gray-100 shadow-md hover:scale-[1.01]"
             >
               {image.src ? (
                 <img
                   alt={image.label || `Image ${index + 1}`}
-                  className="h-56 w-full object-cover"
-                  src={image.url}
+                  className="h-40 w-full object-cover"
+                  src={image.src}
                   style={{
                     aspectRatio: "200/200",
                     objectFit: "cover",
@@ -39,9 +40,7 @@ export function ImageList({
                 <h3 className="font-semibold">
                   {image.label || `Image ${index + 1}`}
                 </h3>
-                <p className="text-gray-500">
-                  {image.label ? `This is ${image.label}` : `No label provided`}
-                </p>
+                <p className="text-gray-500">{urlBuilder(image)}</p>
               </div>
             </div>
           ))}

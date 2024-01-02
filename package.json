@@ -32,6 +32,7 @@
     "next": "^14.0.3",
     "next-auth": "^4.24.5",
     "react": "18.2.0",
+    "react-complex-tree": "^2.3.2",
     "react-dom": "18.2.0",
     "react-resizable-panels": "^1.0.6",
     "tailwind-merge": "^2.2.0",

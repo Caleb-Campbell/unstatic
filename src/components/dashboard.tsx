@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Project } from "@prisma/client";
+import { Image, Project } from "@prisma/client";
 import Modal from "./Modal";
 import CreateANewProject from "~/views/CreateAProject";
 import { ArrowLeft, PlusIcon, XIcon } from "lucide-react";
@@ -32,7 +32,9 @@ type NewImageData = {
 
 export function Dashboard({ userData }: { userData: any }) {
   const [selectedFolder, setSelectedFolder] = useState<number>(0);
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [selectedProject, setSelectedProject] = useState<number | null>(
+    userData.projects[0].id,
+  );
   const [showNewFolderModal, setShowNewFolderModal] = useState<boolean>(false);
   const [showNewImageModal, setShowNewImageModal] = useState<boolean>(false);
   const [newImageData, setNewImageData] = useState<NewImageData>({
@@ -54,18 +56,37 @@ export function Dashboard({ userData }: { userData: any }) {
     );
   }
 
+  const urlBuilder = (image: Image) => {
+    return `https://unstatic.com/${
+      userData.projects[selectedProject || 0].id
+    }/${userData.projects[selectedProject || 0].folders[selectedFolder].id}/${
+      image.url
+    }`;
+  };
+
   return (
     <>
       <Modal open={showNewFolderModal} setOpen={setShowNewFolderModal}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            newFolderNameRef.current?.value.length! > 0 &&
+            if (
+              newFolderNameRef.current?.value &&
+              newFolderNameRef.current?.value.length > 0 &&
+              selectedProject != null
+            ) {
               createNewFolder(
                 newFolderNameRef.current?.value!,
-                userData.projects[selectedProject || 0].id,
+                userData.projects.find(
+                  (project: Project) => project.id === selectedProject,
+                )?.id, // Use the selectedProject's ID
+                selectedFolder,
               );
-            setShowNewFolderModal(false);
+              setShowNewFolderModal(false);
+            } else {
+              // Handle the case where selectedProject is null
+              alert("Please select a project first.");
+            }
           }}
           className="w-[400px] p-5"
         >
@@ -136,13 +157,15 @@ export function Dashboard({ userData }: { userData: any }) {
           </p>
           {/* TODO: We will need to add the real URL */}
           <div>
-            <span>
-              {"https://unstatic.com/"}
-              {selectedProject || userData.projects[0].id}
-              {"/"}
-              {selectedFolder || userData.projects[0].folders[0].name}
-              {"/"}
-            </span>
+            {!!userData.projects[0].folders[0] && (
+              <span>
+                {"https://unstatic.com/"}
+                {selectedProject || userData.projects[0].id}
+                {"/"}
+                {selectedFolder || userData.projects[0].folders[0].name}
+                {"/"}
+              </span>
+            )}
             <input
               className="inline h-5 w-fit max-w-[50%] border-b border-slate-700 py-0 focus:outline-none focus:ring-0"
               onChange={(e) =>
@@ -185,9 +208,15 @@ export function Dashboard({ userData }: { userData: any }) {
             <div className="border-b bg-white dark:bg-gray-900">
               <Select>
                 <SelectTrigger className="w-[300px]">
-                  <SelectValue
-                    placeholder={userData.projects[selectedProject || 0].name}
-                  />
+                  {selectedProject != null && (
+                    <SelectValue
+                      placeholder={
+                        userData.projects.find(
+                          (project: Project) => project.id === selectedProject,
+                        )?.name
+                      }
+                    />
+                  )}
                 </SelectTrigger>
                 <SelectContent className="w-[300px]">
                   {userData.projects.map((project: Project) => (
@@ -209,9 +238,24 @@ export function Dashboard({ userData }: { userData: any }) {
                 </SelectContent>
               </Select>
             </div>
+            <Button
+              onClick={() => setShowNewFolderModal(true)}
+              className={`w-full ${
+                userData.projects.find(
+                  (project: Project) => project.id === selectedProject,
+                )?.folders.length <= 0 && "animate-pulse bg-yellow-200"
+              }`}
+              variant="outline"
+            >
+              New Folder
+            </Button>
             <FolderList
               setSelectedFolder={setSelectedFolder}
-              folders={userData.projects[selectedProject || 0].folders}
+              folders={
+                userData.projects.find(
+                  (project: Project) => project.id === selectedProject,
+                )?.folders
+              }
               setShowNewFolderModal={setShowNewFolderModal}
             />
           </div>
@@ -236,13 +280,17 @@ export function Dashboard({ userData }: { userData: any }) {
             </div>
           </div>
         </div>
-        {userData.projects[selectedProject || 0].folders.length > 0 ? (
+        {userData.projects.find(
+          (project: Project) => project.id === selectedProject,
+        )?.folders.length > 0 ? (
           <main className="flex flex-col gap-4">
             <ImageList
+              urlBuilder={urlBuilder}
               openNewImageModal={() => setShowNewImageModal(true)}
               images={
-                userData.projects[selectedProject || 0].folders[selectedFolder]
-                  .images
+                userData.projects.find(
+                  (project: Project) => project.id === selectedProject,
+                )?.folders[selectedFolder].images as Image[]
               }
             />
           </main>

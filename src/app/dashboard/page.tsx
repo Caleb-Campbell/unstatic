@@ -19,12 +19,16 @@ export default async function DashboardPage() {
 
   const userData = await db.user.findUnique({
     where: {
-      id: "clqt1ijgs0000fp8ncinpnapc",
+      id: "clqv8af230000iotsnxq0o6qx",
     },
     include: {
       projects: {
         include: {
-          folders: true,
+          folders: {
+            include: {
+              images: true,
+            },
+          },
         },
       },
     },
