@@ -33,7 +33,7 @@ type NewImageData = {
 export function Dashboard({ userData }: { userData: any }) {
   const [selectedFolder, setSelectedFolder] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<number | null>(
-    userData.projects[0].id,
+    userData.projects[0]?.id || null,
   );
   const [showNewFolderModal, setShowNewFolderModal] = useState<boolean>(false);
   const [showNewImageModal, setShowNewImageModal] = useState<boolean>(false);
